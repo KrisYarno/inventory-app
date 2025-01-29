@@ -1,5 +1,5 @@
 // controllers/inventoryController.js
-const Product = require('../models/Product');
+const Product = require('../models/Product.js');
 
 exports.renderInventoryPage = async (req, res) => {
   try {

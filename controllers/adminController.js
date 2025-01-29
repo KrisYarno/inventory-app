@@ -1,8 +1,8 @@
 // controllers/adminController.js
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
-const Product = require('../models/Product');
-const InventoryLog = require('../models/inventorylog');
+const User = require('../models/User.js');
+const Product = require('../models/Product.js');
+const InventoryLog = require('../models/InventoryLog.js');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 // Render Admin page with full inventory list

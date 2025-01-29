@@ -1,7 +1,7 @@
 // routes/adminRoutes.js
 const express = require('express');
 const router = express.Router();
-const adminController = require('../controllers/adminController');
+const adminController = require('../controllers/adminController.js');
 
 function ensureAdmin(req, res, next) {
   if (!req.session.userId || !req.session.isAdmin) {

@@ -1,6 +1,6 @@
 // controllers/authController.js
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
+const User = require('../models/User.js');
 
 // Render the login page
 exports.getLogin = (req, res) => {

@@ -1,5 +1,5 @@
 // models/Product.js
-const db = require('../config/db');
+const db = require('../config/db.js');
 // We'll assume you have InventoryLog or the logs table already defined, 
 // but if you're inserting logs directly inside this file, that's fine too.
 

@@ -1,5 +1,5 @@
 // models/User.js
-const db = require('../config/db');
+const db = require('../config/db.js');
 
 // This is a simple model helper to handle user data.
 module.exports = {

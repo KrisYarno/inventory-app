@@ -1,7 +1,7 @@
 // routes/inventoryRoutes.js
 const express = require('express');
 const router = express.Router();
-const inventoryController = require('../controllers/inventoryController');
+const inventoryController = require('../controllers/inventoryController.js');
 
 // Middleware to ensure user is logged in
 function ensureAuth(req, res, next) {

@@ -1,5 +1,5 @@
 // models/InventoryLog.js
-const db = require('../config/db');
+const db = require('../config/db.js');
 
 module.exports = {
   async insertLog(userId, productId, delta) {
