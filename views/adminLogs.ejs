@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory App | Change Log</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-logo">Inventory App</div>
+      <div class="nav-links">
+        <a href="/inventory" class="nav-item nav-link">Main Page</a>
+        <% if (user.isAdmin) { %>
+          <a href="/admin" class="nav-item nav-link">Admin</a>
+        <% } %>
+        <a href="/logout" class="nav-item nav-link">Logout</a>
+      </div>
+    </nav>
+
+    <main class="container">
+      <h1>Inventory Change Log</h1>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Change Time</th>
+              <th>User</th>
+              <th>Product</th>
+              <th>Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% logs.forEach(log => { %>
+              <tr>
+                <td><%= log.id %></td>
+                <td><%= log.changeTime.toLocaleString() %></td>
+                <td><%= log.changedBy %></td>
+                <td><%= log.productName %></td>
+                <td><%= log.delta %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

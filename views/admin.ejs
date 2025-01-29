@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Inventory App | Admin Panel</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-logo">Inventory App</div>
+      <div class="nav-links">
+        <a href="/inventory" class="nav-item nav-link">Main Page</a>
+        <a href="/admin" class="nav-item nav-link">Admin</a>
+        <a href="/logout" class="nav-item nav-link">Logout</a>
+      </div>
+    </nav>
+
+    <main class="container">
+      <h1>Admin Panel</h1>
+
+      <h2>Current Inventory</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Product Name</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% products.forEach(product => { %>
+            <tr>
+              <td><%= product.id %></td>
+              <td><%= product.name %></td>
+              <td><%= product.quantity %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Export and Log Links -->
+      <a href="/admin/export" class="btn btn-primary" style="margin-right: 1rem;">
+        Export Inventory (CSV)
+      </a>
+      <a href="/admin/logs" class="btn btn-primary">
+        View Change Log
+      </a>
+
+      <hr />
+
+      <h2>Create New User</h2>
+      <form action="/admin/users" method="POST" class="new-user-form">
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            name="username"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            required
+          />
+        </div>
+        <div class="form-checkbox">
+          <label>
+            <input
+              type="checkbox"
+              name="isAdmin"
+              value="true"
+            />
+            Make User Admin?
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Create User
+        </button>
+      </form>
+    </main>
+  </body>
+</html>
