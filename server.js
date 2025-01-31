@@ -25,9 +25,6 @@ app.use(
     secret: process.env.SESSION_SECRET || 'defaultsecret',
     resave: false,
     saveUninitialized: false,
-    // If you want a short default TTL, or session-only cookies,
-    // you can omit maxAge or set something like:
-    // cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
   })
 );
 
@@ -36,6 +33,12 @@ app.use(flash());
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// >>> Add this route BEFORE using authRoutes <<<
+app.get('/', (req, res) => {
+  // Redirect root URL to inventory page
+  res.redirect('/inventory');
+});
 
 // Routes
 app.use('/', authRoutes);

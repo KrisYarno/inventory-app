@@ -86,20 +86,20 @@ h1, h2, h3 {
   background-color: #2d3ea3;
 }
 
+/* Make +/- buttons bigger */
 .btn-increment,
 .btn-decrement {
   background-color: #adb5bd; /* gray */
   color: #fff;
-  /* reduced padding to bring buttons closer to input */
-  padding: 0.3rem 0.6rem;  
+  padding: 0.5rem 0.9rem;  /* bigger padding for visibility */
   font-weight: 700;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 1.25rem; /* bigger font */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
-  margin: 0; /* remove extra spacing if desired */
+  margin: 0;
 }
 
 .btn-increment:hover,
@@ -109,7 +109,6 @@ h1, h2, h3 {
 
 /* A smaller, more compact primary button if needed */
 .save-changes-btn {
-  /* override the default .btn padding to make it smaller */
   padding: 0.5rem 1rem;
   font-size: 1rem;
   display: inline-block;
@@ -161,12 +160,13 @@ table {
   min-width: 0;
   margin-bottom: 1rem;
   background: #fff;
+  font-size: 1.1rem; /* Increase font size for the table */
 }
 
 th,
 td {
   text-align: left;
-  padding: 0.6rem;
+  padding: 0.8rem;  /* slightly larger padding */
   border-bottom: 1px solid #ccc;
   vertical-align: middle;
 }
@@ -176,10 +176,23 @@ th {
   font-weight: 500;
 }
 
-/* The numeric input for quantity changes */
+/* The numeric input for quantity changes, bigger font & width */
 .qty-input {
-  width: 50px;
+  width: 60px;
   text-align: center;
+  font-size: 1.2rem; /* bigger font */
+  padding: 0.4rem;
+}
+
+/* Color states for negative/positive values */
+.qty-input.negative {
+  color: red;
+  border: 2px solid red;
+}
+
+.qty-input.positive {
+  color: green;
+  border: 2px solid green;
 }
 
 /* Login container */
