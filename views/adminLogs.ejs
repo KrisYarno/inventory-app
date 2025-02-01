@@ -1,3 +1,4 @@
+<!-- views/adminLogs.ejs -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -39,7 +40,7 @@
             <% logs.forEach(log => { %>
               <tr>
                 <td><%= log.id %></td>
-                <td><%= log.changeTime.toLocaleString() %></td>
+                <td><%= log.changeTime ? log.changeTime.toLocaleString() : '' %></td>
                 <td><%= log.changedBy %></td>
                 <td><%= log.productName %></td>
                 <td><%= log.delta %></td>

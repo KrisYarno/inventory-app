@@ -2,15 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>Inventory App | Admin Panel</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
-      rel="stylesheet"
-    />
+    <title>Admin Panel</title>
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
@@ -19,6 +11,7 @@
       <div class="nav-links">
         <a href="/inventory" class="nav-item nav-link">Main Page</a>
         <a href="/admin" class="nav-item nav-link">Admin</a>
+        <a href="/user/settings" class="nav-item nav-link">My Account</a>
         <a href="/logout" class="nav-item nav-link">Logout</a>
       </div>
     </nav>
@@ -38,58 +31,105 @@
           </thead>
           <tbody>
             <% products.forEach(product => { %>
-            <tr>
-              <td><%= product.id %></td>
-              <td><%= product.name %></td>
-              <td><%= product.quantity %></td>
-            </tr>
+              <tr>
+                <td><%= product.id %></td>
+                <td><%= product.name %></td>
+                <td><%= product.quantity %></td>
+              </tr>
             <% }) %>
           </tbody>
         </table>
       </div>
 
-      <!-- Export and Log Links -->
-      <a href="/admin/export" class="btn btn-primary" style="margin-right: 1rem;">
+      <a href="/admin/export" class="btn btn-primary">
         Export Inventory (CSV)
       </a>
-      <a href="/admin/logs" class="btn btn-primary">
+
+      <a href="/admin/logs" class="btn btn-primary" style="margin-left: 1rem;">
         View Change Log
       </a>
+      
 
-      <hr />
+      <hr/>
 
-      <h2>Create New User</h2>
+      <h2>Create New User (LEGACY. Add email form to utilize)</h2>
       <form action="/admin/users" method="POST" class="new-user-form">
         <div class="form-group">
           <label>Username</label>
-          <input
-            type="text"
-            name="username"
-            required
-          />
+          <input type="text" name="username" required />
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            required
-          />
+          <input type="password" name="password" required />
         </div>
         <div class="form-checkbox">
           <label>
-            <input
-              type="checkbox"
-              name="isAdmin"
-              value="true"
-            />
-            Make User Admin?
+            <input type="checkbox" name="isAdmin" value="true" />
+            Admin?
           </label>
         </div>
         <button type="submit" class="btn btn-primary">
           Create User
         </button>
       </form>
+
+      <hr/>
+
+      <h2>User Management</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>isApproved</th>
+              <th>isAdmin</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(u => { %>
+              <tr>
+                <td><%= u.id %></td>
+                <td><%= u.username %></td>
+                <td><%= u.email %></td>
+                <td><%= u.isApproved %></td>
+                <td><%= u.isAdmin %></td>
+                <td>
+                  <!-- We use the same route /admin/manage-user with different 'action' values -->
+                  <form action="/admin/manage-user" method="POST" style="display:inline-block;">
+                    <input type="hidden" name="userId" value="<%= u.id %>" />
+                    <!-- Approve / Revoke logic -->
+                    <% if (!u.isApproved) { %>
+                      <button type="submit" name="action" value="approve" class="btn btn-primary">Approve</button>
+                    <% } else { %>
+                      <button type="submit" name="action" value="revokeApproval" class="btn">Revoke Approval</button>
+                    <% } %>
+                  </form>
+
+                  <form action="/admin/manage-user" method="POST" style="display:inline-block;">
+                    <input type="hidden" name="userId" value="<%= u.id %>" />
+                    <!-- Admin / Revoke admin logic -->
+                    <% if (!u.isAdmin) { %>
+                      <button type="submit" name="action" value="grantAdmin" class="btn btn-primary">Grant Admin</button>
+                    <% } else { %>
+                      <button type="submit" name="action" value="revokeAdmin" class="btn">Revoke Admin</button>
+                    <% } %>
+                  </form>
+
+                  <form action="/admin/manage-user" method="POST" style="display:inline-block;">
+                    <input type="hidden" name="userId" value="<%= u.id %>" />
+                    <button type="submit" name="action" value="delete" class="btn btn-decrement" onclick="return confirm('Are you sure?');">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     </main>
   </body>
 </html>

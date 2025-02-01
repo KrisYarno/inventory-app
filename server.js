@@ -8,6 +8,7 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -19,12 +20,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session configuration (only once)
+// Session configuration
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'defaultsecret',
     resave: false,
     saveUninitialized: false,
+    // Example cookie config: 
+    // cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
   })
 );
 
@@ -34,9 +37,8 @@ app.use(flash());
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// >>> Add this route BEFORE using authRoutes <<<
+// Redirect root URL ("/") to "/inventory"
 app.get('/', (req, res) => {
-  // Redirect root URL to inventory page
   res.redirect('/inventory');
 });
 
@@ -44,6 +46,7 @@ app.get('/', (req, res) => {
 app.use('/', authRoutes);
 app.use('/inventory', inventoryRoutes);
 app.use('/admin', adminRoutes);
+app.use('/user', userRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

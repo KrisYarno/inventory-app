@@ -1,17 +1,27 @@
 // models/InventoryLog.js
-const db = require('../config/db.js');
+const db = require('../config/db');
 
 module.exports = {
-  async insertLog(userId, productId, delta) {
+  /**
+   * Insert a log row whenever a product quantity changes.
+   */
+  async insertLog(userId, productId, delta, connection = null) {
+    // If you're inside a transaction, pass 'connection'; otherwise, use db.execute.
     const sql = `
       INSERT INTO inventory_logs (userId, productId, delta, changeTime)
       VALUES (?, ?, ?, NOW())
     `;
-    await db.execute(sql, [userId, productId, delta]);
+    if (connection) {
+      await connection.execute(sql, [userId, productId, delta]);
+    } else {
+      await db.execute(sql, [userId, productId, delta]);
+    }
   },
 
+  /**
+   * Get all logs, joined to the user and product name for easy display.
+   */
   async getAllLogs() {
-    // We'll join with users and products to get more descriptive info
     const sql = `
       SELECT 
         l.id,

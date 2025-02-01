@@ -1,7 +1,6 @@
 // models/Product.js
-const db = require('../config/db.js');
-// We'll assume you have InventoryLog or the logs table already defined, 
-// but if you're inserting logs directly inside this file, that's fine too.
+const db = require('../config/db');
+const InventoryLog = require('./InventoryLog'); // Import the log model
 
 module.exports = {
   getAllProducts: async () => {
@@ -10,21 +9,18 @@ module.exports = {
     return rows;
   },
 
-  // Modified to skip insert/update if delta = 0
   updateProductQuantities: async (updates, userId) => {
-    // 'updates' is an array of { productId, delta }
-    // 'userId' is who triggered these changes.
+    // updates is an array of { productId, delta }
+    // userId is who triggered these changes
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
 
       for (const { productId, delta } of updates) {
-        // Skip if there is no change:
-        if (delta === 0) {
-          continue;
-        }
+        // Skip if no change:
+        if (delta === 0) continue;
 
-        // 1) Update the product's quantity:
+        // 1) Update product quantity
         const updateSql = `
           UPDATE products
           SET quantity = quantity + ?
@@ -32,12 +28,8 @@ module.exports = {
         `;
         await connection.execute(updateSql, [delta, productId]);
 
-        // 2) Insert a change-log record inside the same transaction:
-        const logSql = `
-          INSERT INTO inventory_logs (userId, productId, delta, changeTime)
-          VALUES (?, ?, ?, NOW())
-        `;
-        await connection.execute(logSql, [userId, productId, delta]);
+        // 2) Insert a change-log record in the same transaction
+        await InventoryLog.insertLog(userId, productId, delta, connection);
       }
 
       await connection.commit();
