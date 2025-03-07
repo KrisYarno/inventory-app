@@ -4,7 +4,7 @@ const InventoryLog = require('./InventoryLog'); // Import the log model
 
 module.exports = {
   getAllProducts: async () => {
-    const sql = 'SELECT * FROM products';
+    const sql = 'SELECT * FROM products ORDER BY name';
     const [rows] = await db.execute(sql);
     return rows;
   },
