@@ -1,135 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Admin Panel</title>
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="nav-logo">Inventory Tracker</div>
-      <div class="nav-links">
-        <a href="/inventory" class="nav-item nav-link">Main Page</a>
-        <a href="/admin" class="nav-item nav-link">Admin</a>
-        <a href="/user/settings" class="nav-item nav-link">My Account</a>
-        <a href="/logout" class="nav-item nav-link">Logout</a>
-      </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Inventory App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/inventory">Inventory App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/inventory">Inventory Adjust</a>
+                    </li>
+                    <% if (user && user.isAdmin) { %>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/admin">Admin Panel</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link" href="/admin/logs">View Logs</a>
+                        </li>
+                    <% } %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user/settings">My Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </nav>
 
-    <main class="container">
-      <h1>Admin Panel</h1>
+    <div class="container">
+        <h1 class="text-center mb-4">Admin Dashboard</h1>
 
-      <h2>Current Inventory</h2>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Product ID</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% products.forEach(product => { %>
-              <tr>
-                <td><%= product.id %></td>
-                <td><%= product.name %></td>
-                <td><%= product.quantity %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+        <ul class="nav nav-tabs mb-3" id="adminTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Inventory Overview</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="manage-users-tab" data-bs-toggle="tab" data-bs-target="#manage-users" type="button" role="tab" aria-controls="manage-users" aria-selected="false">Manage Users</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="create-user-tab" data-bs-toggle="tab" data-bs-target="#create-user" type="button" role="tab" aria-controls="create-user" aria-selected="false">Create User (Legacy)</button>
+            </li>
+             <li class="nav-item" role="presentation">
+                <a class="nav-link" href="/admin/logs">View Change Logs</a>
+            </li>
+        </ul>
 
-      <a href="/admin/export" class="btn btn-primary">
-        Export Inventory (CSV)
-      </a>
+        <div class="tab-content" id="adminTabContent">
 
-      <a href="/admin/logs" class="btn btn-primary" style="margin-left: 1rem;">
-        View Change Log
-      </a>
-      
+            <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                <h2>Inventory Overview</h2>
+                <a href="/admin/export" class="btn btn-success mb-3">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Export as CSV
+                </a>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered" id="inventory-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Product Name</th>
+                                <th scope="col" class="text-end">Quantity on Hand</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% products.forEach(product => { %>
+                                <tr>
+                                    <td><%= product.id %></td>
+                                    <td><%= product.name %></td>
+                                    <td class="text-end"><%= product.quantity %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
 
-      <hr/>
+            <div class="tab-pane fade" id="manage-users" role="tabpanel" aria-labelledby="manage-users-tab">
+                <h2>Manage Users</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered align-middle" id="user-management-table">
+                         <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(u => { %>
+                                <tr>
+                                    <td><%= u.username %></td>
+                                    <td><%= u.email || 'N/A' %></td>
+                                    <td>
+                                        <% if (u.isApproved) { %>
+                                            <span class="badge bg-success">Approved</span>
+                                        <% } else { %>
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (u.isAdmin) { %>
+                                            <span class="badge bg-primary">Admin</span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary">User</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="User Actions">
+                                            <form action="/admin/manage-user" method="POST" class="d-inline">
+                                                <input type="hidden" name="userId" value="<%= u.id %>">
+                                                <% if (u.isApproved) { %>
+                                                    <input type="hidden" name="action" value="revokeApproval">
+                                                    <button type="submit" class="btn btn-warning" title="Revoke Approval"><i class="bi bi-person-x-fill"></i></button>
+                                                <% } else { %>
+                                                    <input type="hidden" name="action" value="approve">
+                                                    <button type="submit" class="btn btn-success" title="Approve User"><i class="bi bi-person-check-fill"></i></button>
+                                                <% } %>
+                                            </form>
 
-      <h2>Create New User (LEGACY. Add email form to utilize)</h2>
-      <form action="/admin/users" method="POST" class="new-user-form">
-        <div class="form-group">
-          <label>Username</label>
-          <input type="text" name="username" required />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" name="password" required />
-        </div>
-        <div class="form-checkbox">
-          <label>
-            <input type="checkbox" name="isAdmin" value="true" />
-            Admin?
-          </label>
-        </div>
-        <button type="submit" class="btn btn-primary">
-          Create User
-        </button>
-      </form>
+                                            <form action="/admin/manage-user" method="POST" class="d-inline">
+                                                <input type="hidden" name="userId" value="<%= u.id %>">
+                                                <% if (u.isAdmin) { %>
+                                                    <input type="hidden" name="action" value="revokeAdmin">
+                                                    <button type="submit" class="btn btn-secondary" title="Revoke Admin"><i class="bi bi-person-dash-fill"></i></button>
+                                                <% } else { %>
+                                                    <input type="hidden" name="action" value="grantAdmin">
+                                                    <button type="submit" class="btn btn-info" title="Grant Admin"><i class="bi bi-person-plus-fill"></i></button>
+                                                <% } %>
+                                            </form>
 
-      <hr/>
+                                            <form action="/admin/manage-user" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete user <%= u.username %>?');">
+                                                <input type="hidden" name="userId" value="<%= u.id %>">
+                                                <input type="hidden" name="action" value="delete">
+                                                <button type="submit" class="btn btn-danger" title="Delete User"><i class="bi bi-trash-fill"></i></button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-      <h2>User Management</h2>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>isApproved</th>
-              <th>isAdmin</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% users.forEach(u => { %>
-              <tr>
-                <td><%= u.id %></td>
-                <td><%= u.username %></td>
-                <td><%= u.email %></td>
-                <td><%= u.isApproved %></td>
-                <td><%= u.isAdmin %></td>
-                <td>
-                  <!-- We use the same route /admin/manage-user with different 'action' values -->
-                  <form action="/admin/manage-user" method="POST" style="display:inline-block;">
-                    <input type="hidden" name="userId" value="<%= u.id %>" />
-                    <!-- Approve / Revoke logic -->
-                    <% if (!u.isApproved) { %>
-                      <button type="submit" name="action" value="approve" class="btn btn-primary">Approve</button>
-                    <% } else { %>
-                      <button type="submit" name="action" value="revokeApproval" class="btn">Revoke Approval</button>
-                    <% } %>
-                  </form>
+            <div class="tab-pane fade" id="create-user" role="tabpanel" aria-labelledby="create-user-tab">
+                <h2>Create New User (Legacy)</h2>
+                 <p class="text-muted">Use this form for manual user creation. Users created here are approved by default but lack an email address.</p>
+                <form action="/admin/users" method="POST" class="new-user-form needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <div class="invalid-feedback">Please enter a username.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                             <div class="invalid-feedback">Please enter a password.</div>
+                        </div>
+                         <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isAdmin" name="isAdmin" value="true">
+                                <label class="form-check-label" for="isAdmin">
+                                    Make Admin?
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Create User</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                  <form action="/admin/manage-user" method="POST" style="display:inline-block;">
-                    <input type="hidden" name="userId" value="<%= u.id %>" />
-                    <!-- Admin / Revoke admin logic -->
-                    <% if (!u.isAdmin) { %>
-                      <button type="submit" name="action" value="grantAdmin" class="btn btn-primary">Grant Admin</button>
-                    <% } else { %>
-                      <button type="submit" name="action" value="revokeAdmin" class="btn">Revoke Admin</button>
-                    <% } %>
-                  </form>
+        </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      // Example starter JavaScript for disabling form submissions if there are invalid fields
+      (() => {
+        'use strict'
 
-                  <form action="/admin/manage-user" method="POST" style="display:inline-block;">
-                    <input type="hidden" name="userId" value="<%= u.id %>" />
-                    <button type="submit" name="action" value="delete" class="btn btn-decrement" onclick="return confirm('Are you sure?');">
-                      Delete
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </body>
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        const forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.from(forms).forEach(form => {
+          form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+
+            form.classList.add('was-validated')
+          }, false)
+        })
+      })()
+    </script>
+</body>
 </html>
