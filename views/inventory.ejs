@@ -17,24 +17,27 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/inventory">Inventory Adjust</a>
+                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                     <% if (currentUserLocation && allLocations && allLocations.length > 0) { %>
+                    <li class="nav-item dropdown me-lg-2 mb-2 mb-lg-0">
+                        <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm" href="#" role="button" id="locationDropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false" data-current-location-id="<%= currentUserLocation.id %>">
+                            <i class="bi bi-geo-alt-fill"></i> <%= currentUserLocation.name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="locationDropdownMenuLink" id="locationSelectorDropdown">
+                            <% allLocations.forEach(location => { %>
+                                <li><a class="dropdown-item <% if (location.id === currentUserLocation.id) { %>active<% } %>" href="#" data-location-id="<%= location.id %>"><%= location.name %></a></li>
+                            <% }); %>
+                        </ul>
                     </li>
-                    <% if (user && user.isAdmin) { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin">Admin Panel</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/logs">View Logs</a>
-                        </li>
                     <% } %>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/user/settings">My Account</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'inventory') { %>active<% } %>" href="/inventory">Inventory Adjust</a></li>
+                    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'admin') { %>active<% } %>" href="/admin">Admin Panel</a></li>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'logs') { %>active<% } %>" href="/admin/logs">View Logs</a></li>
+                    <% } %>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'transfer') { %>active<% } %>" href="/transfer">Transfer Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'settings') { %>active<% } %>" href="/user/settings">My Account</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -43,12 +46,29 @@
     <div class="container">
         <h1 class="text-center mb-4">Adjust Inventory</h1>
 
+        <%# Display Success Flash Messages %>
         <% if (successMessage && successMessage.length > 0) { %>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <%= successMessage %>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         <% } %>
+        <%# Display Error Flash Messages (assuming error flash is also used) %>
+         <% const errorFlash = locals.errorFlash || (typeof req !== 'undefined' ? req.flash('error') : []) %> <%# Get error flash, handle potential missing req %>
+         <% if (errorFlash && errorFlash.length > 0) { %>
+             <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                 <%= errorFlash.join('<br>') %>
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+             </div>
+         <% } %>
+         <%# Display Info Flash Messages %>
+         <% const infoFlash = locals.infoFlash || (typeof req !== 'undefined' ? req.flash('info') : []) %>
+          <% if (infoFlash && infoFlash.length > 0) { %>
+             <div class="alert alert-info alert-dismissible fade show" role="alert">
+                 <%= infoFlash.join('<br>') %>
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+             </div>
+         <% } %>
 
 
         <div class="inventory-form-container mx-auto" style="max-width: 700px;">
@@ -64,7 +84,7 @@
                             </thead>
                             <tbody>
                                 <% products.forEach(product => { %>
-                                    <tr data-product-name="<%= product.name %>"> <%# <-- Added data-product-name here %>
+                                    <tr data-product-name="<%= product.name %>"> <%# EJS comment: Added data-product-name %>
                                         <td><%= product.name %></td>
                                         <td>
                                             <div class="input-group justify-content-center">
@@ -72,14 +92,14 @@
                                                     <i class="bi bi-dash-lg"></i>
                                                 </button>
                                                 <input type="hidden" name="productId" value="<%= product.id %>">
-                                                <%# Added data-product-name here as well for easier access if needed %>
+                                                <%# EJS comment: Added data-product-name for easier access %>
                                                 <input
                                                     type="number"
                                                     name="quantityChange"
                                                     class="form-control text-center qty-input"
                                                     value="0"
                                                     data-productid="<%= product.id %>"
-                                                    data-product-name="<%= product.name %>" <%# <-- Added data-product-name %>
+                                                    data-product-name="<%= product.name %>"
                                                     style="max-width: 80px;"
                                                     aria-label="Quantity change for <%= product.name %>">
                                                 <button type="button" class="btn btn-outline-success increment-btn" data-productid="<%= product.id %>">
@@ -93,7 +113,7 @@
                         </table>
                     </div>
                     <div class="text-center mt-3">
-                        <%# Changed button: Removed type="submit", added data-bs-toggle/target %>
+                        <%# EJS comment: Button triggers modal %>
                         <button type="button" class="btn btn-primary btn-lg" id="saveChangesBtn" data-bs-toggle="modal" data-bs-target="#confirmChangesModal">
                             Save Changes
                         </button>
@@ -105,6 +125,11 @@
         </div>
     </div>
 
+     <span id="current-location-name-holder"
+          data-location-name="<%= typeof currentUserLocation !== 'undefined' && currentUserLocation ? currentUserLocation.name : 'Unknown' %>"
+          style="display: none;">
+    </span>
+
     <div class="modal fade" id="confirmChangesModal" tabindex="-1" aria-labelledby="confirmChangesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -113,9 +138,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to make the following adjustments?</p>
+                    <%# Display the current location %>
+                    <p class="mb-3">Applying changes to location: <strong id="modalLocationName" class="text-primary"></strong></p>
+                    <hr> <%# Add a separator %>
+
+                    <p>Are these the adjustments you want to make?</p>
                     <ul id="changes-summary-list" class="list-unstyled">
-                        <%# Changes will be injected here by JavaScript %>
+                        <%# EJS comment: Changes injected here by JS %>
                     </ul>
                     <p id="no-changes-message" class="text-muted" style="display: none;">No changes detected.</p>
                 </div>
@@ -130,5 +159,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="/js/client.js"></script>
+    <script src="/js/locationSwitcher.js"></script>
 </body>
 </html>

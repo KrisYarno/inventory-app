@@ -17,24 +17,27 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/inventory">Inventory Adjust</a>
+                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                     <% if (currentUserLocation && allLocations && allLocations.length > 0) { %>
+                    <li class="nav-item dropdown me-lg-2 mb-2 mb-lg-0">
+                        <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm" href="#" role="button" id="locationDropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false" data-current-location-id="<%= currentUserLocation.id %>">
+                            <i class="bi bi-geo-alt-fill"></i> <%= currentUserLocation.name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="locationDropdownMenuLink" id="locationSelectorDropdown">
+                            <% allLocations.forEach(location => { %>
+                                <li><a class="dropdown-item <% if (location.id === currentUserLocation.id) { %>active<% } %>" href="#" data-location-id="<%= location.id %>"><%= location.name %></a></li>
+                            <% }); %>
+                        </ul>
                     </li>
-                    <% if (user && user.isAdmin) { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin">Admin Panel</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/logs">View Logs</a>
-                        </li>
                     <% } %>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/user/settings">My Account</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'inventory') { %>active<% } %>" href="/inventory">Inventory Adjust</a></li>
+                    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'admin') { %>active<% } %>" href="/admin">Admin Panel</a></li>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'logs') { %>active<% } %>" href="/admin/logs">View Logs</a></li>
+                    <% } %>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'transfer') { %>active<% } %>" href="/transfer">Transfer Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link <% if (typeof page !== 'undefined' && page === 'settings') { %>active<% } %>" href="/user/settings">My Account</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -45,24 +48,53 @@
             <div class="col-md-8 col-lg-6">
                 <h1 class="text-center mb-4">Account Settings</h1>
 
+                 <div id="flash-message-area" class="mb-3">
+                     <%# FIX: Check if error exists AND has content %>
+                     <% if (typeof error !== 'undefined' && error && error.length > 0) { %>
+                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                             <%= error %>
+                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                         </div>
+                     <% } %>
+                     <%# FIX: Check if success exists AND has content %>
+                     <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+                         <div class="alert alert-success alert-dismissible fade show" role="alert">
+                             <%= success %>
+                              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                         </div>
+                     <% } %>
+                 </div>
+                 <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                       Set Default Login Location
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">This location will be automatically selected each time you log in.</p>
+                        <%# Ensure currentUser and allLocations are available %>
+                        <% if (typeof currentUser !== 'undefined' && typeof allLocations !== 'undefined' && allLocations.length > 0) { %>
+                            <form action="/user/update-default-location" method="POST">
+                                <div class="mb-3">
+                                    <label for="defaultLocationSelect" class="form-label">Default Location:</label>
+                                    <select class="form-select" id="defaultLocationSelect" name="newLocationId" required>
+                                        <% allLocations.forEach(location => { %>
+                                            <option value="<%= location.id %>" <% if (location.id === currentUser.defaultLocationId) { %>selected<% } %>>
+                                                <%= location.name %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-secondary">Save Default Location</button>
+                            </form>
+                        <% } else { %>
+                            <p class="text-danger">Could not load location settings.</p>
+                        <% } %>
+                    </div>
+                 </div>
                  <div class="card shadow-sm mb-4">
                      <div class="card-header">
                         Change Password
                      </div>
                     <div class="card-body">
-                        <% if (error) { %>
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <%= error %>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        <% } %>
-                        <% if (success) { %>
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <%= success %>
-                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        <% } %>
-
                         <form action="/user/change-password" method="POST" class="needs-validation" novalidate>
                             <div class="mb-3">
                                 <label for="oldPassword" class="form-label">Old Password</label>
@@ -84,31 +116,27 @@
                     </div>
                 </div>
 
-                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-      // Example starter JavaScript for disabling form submissions if there are invalid fields
+      // Form validation script
       (() => {
         'use strict'
-
-        // Fetch all the forms we want to apply custom Bootstrap validation styles to
         const forms = document.querySelectorAll('.needs-validation')
-
-        // Loop over them and prevent submission
         Array.from(forms).forEach(form => {
           form.addEventListener('submit', event => {
             if (!form.checkValidity()) {
               event.preventDefault()
               event.stopPropagation()
             }
-
             form.classList.add('was-validated')
           }, false)
         })
       })()
     </script>
+    <script src="/js/locationSwitcher.js"></script>
 </body>
 </html>

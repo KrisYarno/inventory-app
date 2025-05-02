@@ -17,20 +17,43 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/inventory">Inventory Adjust</a>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+
+                     <% if (currentUserLocation && allLocations && allLocations.length > 0) { %>
+                    <li class="nav-item dropdown me-lg-2 mb-2 mb-lg-0">
+                        <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm" href="#" role="button" id="locationDropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false" data-current-location-id="<%= currentUserLocation.id %>">
+                            <i class="bi bi-geo-alt-fill"></i> <%= currentUserLocation.name %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="locationDropdownMenuLink" id="locationSelectorDropdown">
+                            <% allLocations.forEach(location => { %>
+                                <li>
+                                    <a class="dropdown-item <% if (location.id === currentUserLocation.id) { %>active<% } %>"
+                                       href="#"
+                                       data-location-id="<%= location.id %>">
+                                        <%= location.name %>
+                                    </a>
+                                </li>
+                            <% }); %>
+                        </ul>
                     </li>
-                    <% if (user && user.isAdmin) { %>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/admin">Admin Panel</a>
-                        </li>
-                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/logs">View Logs</a>
-                        </li>
                     <% } %>
                     <li class="nav-item">
-                        <a class="nav-link" href="/user/settings">My Account</a>
+                        <%# Determine active class based on current page if possible %>
+                        <a class="nav-link <% if (typeof page !== 'undefined' && page === 'inventory') { %>active<% } %>" href="/inventory">Inventory Adjust</a>
+                    </li>
+                    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %> <%# Assuming 'user' is still passed via session or res.locals if needed elsewhere %>
+                        <li class="nav-item">
+                            <a class="nav-link <% if (typeof page !== 'undefined' && page === 'admin') { %>active<% } %>" href="/admin">Admin Panel</a>
+                        </li>
+                         <li class="nav-item">
+                            <a class="nav-link <% if (typeof page !== 'undefined' && page === 'logs') { %>active<% } %>" href="/admin/logs">View Logs</a>
+                        </li>
+                    <% } %>
+                     <li class="nav-item">
+                            <a class="nav-link <% if (typeof page !== 'undefined' && page === 'transfer') { %>active<% } %>" href="/transfer">Transfer Inventory</a> <%# Added link for future step %>
+                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link <% if (typeof page !== 'undefined' && page === 'settings') { %>active<% } %>" href="/user/settings">My Account</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>
@@ -69,22 +92,79 @@
                     <table class="table table-striped table-hover table-bordered" id="inventory-table">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col">ID</th>
+                                <th scope="col" style="width: 50px;"></th> <%# Column for expand button %>
                                 <th scope="col">Product Name</th>
-                                <th scope="col" class="text-end">Quantity on Hand</th>
+                                <th scope="col" class="text-end">Total Quantity</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% products.forEach(product => { %>
+                            <% if (products && products.length > 0) { %>
+                                <% products.forEach(product => { %>
+                                    <% const detailId = `location-details-${product.id}`; %>
+                                    <%# Main Product Row %>
+                                    <tr>
+                                        <td>
+                                            <%# Expand/Collapse Button %>
+                                            <% if (product.locations) { %>
+                                            <button
+                                                class="btn btn-sm btn-outline-secondary py-0 px-1 toggle-details-btn" <%# Added class %>
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#<%= detailId %>"
+                                                aria-expanded="false"
+                                                aria-controls="<%= detailId %>"
+                                                title="Show/Hide Location Details">
+                                                <i class="bi bi-plus-lg toggle-icon"></i> <%# Added class %>
+                                            </button>
+                                            <% } %>
+                                        </td>
+                                        <%# Product Name Cell - Now also toggles collapse %>
+                                        <td
+                                            class="clickable-cell" <%# Added class %>
+                                            <% if (product.locations) { %>
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#<%= detailId %>"
+                                                aria-controls="<%= detailId %>"
+                                                title="Show/Hide Location Details"
+                                            <% } %>>
+                                            <%= product.name %>
+                                        </td>
+                                        <td class="text-end fw-bold"><%= product.totalQuantity %></td>
+                                    </tr>
+                                    <%# Collapsible Row for Location Details %>
+                                     <% if (product.locations) { %>
+                                        <tr class="collapse location-details-row" id="<%= detailId %>"> <%# Added class %>
+                                            <td colspan="3" class="p-2 bg-light"> <%# Span across all columns %>
+                                                <div class="d-flex justify-content-start align-items-center ps-3">
+                                                     <strong class="me-3">Location Breakdown:</strong>
+                                                    <% const locationOrder = [1, 2, 3]; %>
+                                                    <% locationOrder.forEach(locId => { %>
+                                                        <% const locData = product.locations[locId]; %>
+                                                        <% if (locData) { %>
+                                                            <span class="badge rounded-pill me-2
+                                                                <% if(locId === 1) { %> bg-primary
+                                                                <% } else if (locId === 2) { %> bg-warning text-dark
+                                                                <% } else if (locId === 3) { %> bg-success
+                                                                <% } else { %> bg-secondary <% } %>"
+                                                                title="<%= locData.locationName %>">
+                                                                <%= locData.locationName %>: <%= locData.quantity %>
+                                                            </span>
+                                                        <% } %>
+                                                    <% }); %>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                     <% } %>
+                                <% }); %>
+                            <% } else { %>
                                 <tr>
-                                    <td><%= product.id %></td>
-                                    <td><%= product.name %></td>
-                                    <td class="text-end"><%= product.quantity %></td>
+                                    <td colspan="3" class="text-center">No products found.</td>
                                 </tr>
-                            <% }); %>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
+                <%# End of table-responsive %>
                 </div>
 
             <div class="tab-pane fade" id="manage-users" role="tabpanel" aria-labelledby="manage-users-tab">
@@ -209,5 +289,7 @@
         })
       })()
     </script>
+    <script src="/js/locationSwitcher.js"></script>
+    <script src="/js/adminInteractions.js"></script>
 </body>
 </html>

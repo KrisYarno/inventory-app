@@ -70,3 +70,21 @@ body {
 }
 
 /* You can add more specific styles for admin page, settings page etc. later */
+
+/* Add this to your existing style.css file */
+
+/* Make product name cell clickable */
+#inventory-table .clickable-cell {
+  cursor: pointer;
+}
+
+/* Optional styles for admin inventory breakdown */
+#inventory-table .collapse td {
+  /* Add subtle background or border */
+  /* background-color: #f8f9fa; */
+  border-top: none; /* Avoid double border */
+}
+
+#inventory-table .badge {
+  font-size: 0.85em; /* Adjust badge size if needed */
+}

@@ -4,63 +4,91 @@ const User = require('../models/User');
 
 // Render the login page
 exports.getLogin = (req, res) => {
-  // If you want to show flash messages, you can retrieve them here
-  // const errorMessage = req.flash('error');
   res.render('login', { error: null });
 };
 
 // Handle login form submission
 exports.postLogin = async (req, res) => {
-  // We'll assume you named the form field "usernameOrEmail"
-  const { usernameOrEmail, password } = req.body;
+  const { usernameOrEmail, password, rememberMe } = req.body; // Get rememberMe from body
 
   try {
-    // Decide if input looks like an email or a username
-    let user;
-    if (usernameOrEmail.includes('@')) {
-      user = await User.findByEmail(usernameOrEmail);
-    } else {
-      user = await User.findByUsername(usernameOrEmail);
-    }
+      let user;
+      if (usernameOrEmail.includes('@')) {
+          user = await User.findByEmail(usernameOrEmail);
+      } else {
+          user = await User.findByUsername(usernameOrEmail);
+      }
 
-    if (!user) {
-      return res.render('login', { error: 'Invalid username/email or password' });
-    }
+      if (!user) {
+          // Use flash messages for feedback
+          req.flash('error', 'Invalid username/email or password');
+          return res.redirect('/login');
+      }
 
-    // Check if user is approved
-    if (!user.isApproved) {
-      return res.render('login', { error: 'Your account is pending approval' });
-    }
+      if (!user.isApproved) {
+           req.flash('error', 'Your account is pending approval');
+           return res.redirect('/login');
+      }
 
-    // Compare password
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if (!match) {
-      return res.render('login', { error: 'Invalid username/email or password' });
-    }
+      const match = await bcrypt.compare(password, user.passwordHash);
+      if (!match) {
+           req.flash('error', 'Invalid username/email or password');
+           return res.redirect('/login');
+      }
 
-    // Store user info in session
-    req.session.userId = user.id;
-    req.session.isAdmin = user.isAdmin;
+      // --- NEW: Handle "Remember Me" ---
+      if (rememberMe === 'true') {
+          // Set cookie maxAge to 1 week (in milliseconds)
+          const oneWeek = 7 * 24 * 60 * 60 * 1000;
+          req.session.cookie.maxAge = oneWeek;
+          console.log(`Setting persistent session for user ${user.id} for 1 week.`); // For debugging
+      } else {
+          // Set cookie maxAge to null -> becomes session cookie (expires on browser close)
+          req.session.cookie.maxAge = null;
+          console.log(`Setting session cookie for user ${user.id}.`); // For debugging
+      }
+      // --- End Handle "Remember Me" ---
 
-    // redirect to main page
-    return res.redirect('/inventory');
+      // Regenerate session ID upon login for security (optional but recommended)
+      // req.session.regenerate(function(err) {
+      //    if (err) { /* handle error */ return next(err); }
+      //    // Store user info in session
+      //    req.session.userId = user.id;
+      //    req.session.isAdmin = user.isAdmin;
+      //    req.session.currentLocationId = user.defaultLocationId || 1;
+      //    // redirect after regeneration
+      //     res.redirect('/inventory');
+      // });
+
+      // Store user info in session (without regenerate for now)
+      req.session.userId = user.id;
+      req.session.isAdmin = user.isAdmin;
+      req.session.currentLocationId = user.defaultLocationId || 1;
+
+
+      // Redirect to main page
+      return res.redirect('/inventory');
+
   } catch (error) {
-    console.error(error);
-    return res.render('login', { error: 'An error occurred' });
+      console.error('Login error:', error);
+      req.flash('error', 'An error occurred during login.');
+      return res.redirect('/login');
   }
 };
 
 // Handle logout
 exports.logout = (req, res) => {
-  req.session.destroy(() => {
+  req.session.destroy((err) => {
+    if (err) {
+        console.error('Logout error:', err);
+         // Handle error appropriately, maybe render an error page
+         // For now, just redirecting
+    }
     res.redirect('/login');
   });
 };
 
-/**
- * SIGNUP logic - new method
- * We'll store the user with isApproved=0.
- */
+// --- SIGNUP ---
 exports.getSignup = (req, res) => {
   res.render('signup', { error: null });
 };
@@ -68,16 +96,10 @@ exports.getSignup = (req, res) => {
 exports.postSignup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    if (!username || !password) {
-      return res.render('signup', { error: 'Username and password are required' });
-    }
-    // Email is optional for login, but let's require it for signups if you want:
-    // If truly optional, remove or tweak this check
-    if (!email) {
-      return res.render('signup', { error: 'Email is required' });
+    if (!username || !password || !email) { // Made email required for signup
+      return res.render('signup', { error: 'Username, email, and password are required' });
     }
 
-    // Check if email or username is in use
     const existingEmailUser = await User.findByEmail(email);
     if (existingEmailUser) {
       return res.render('signup', { error: 'That email is already in use' });
@@ -90,23 +112,27 @@ exports.postSignup = async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create with isApproved=0 by default
+    // Create with isApproved=0 by default, defaultLocationId=1
     await User.createUserWithEmail({
       username,
       email,
       passwordHash,
       isAdmin: 0,
-      isApproved: 0
+      isApproved: 0,
+      defaultLocationId: 1 // Explicitly setting default
     });
 
-    // Show a message that admin must approve
-    return res.render('login', {
-      error: 'Account created. Please wait for admin approval.'
+    return res.render('login', { // Redirect to login with message
+      error: null, // Clear previous errors
+      // Using a query parameter or flash message might be better long term
+      // But for now, let's use the error field repurposed for info
+      // Consider changing 'error' template variable to 'message' for flexibility
+      infoMessage: 'Account created. Please wait for admin approval.'
     });
   } catch (err) {
-    console.error(err);
+    console.error('Signup error:', err);
     return res.render('signup', {
-      error: 'An error occurred. Please try again.'
+      error: 'An error occurred during signup. Please try again.'
     });
   }
 };
