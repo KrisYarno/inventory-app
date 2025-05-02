@@ -18,6 +18,8 @@ const loadLocationData = require('./middleware/locationMiddleware');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Set up EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
