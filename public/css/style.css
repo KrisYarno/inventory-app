@@ -88,3 +88,9 @@ body {
 #inventory-table .badge {
   font-size: 0.85em; /* Adjust badge size if needed */
 }
+
+/* Existing styles ... */
+.location-1 { color: #007bff; } /* Blue for Office */
+.location-2 { color: #fd7e14; } /* Orange for Derek/Xia */
+.location-3 { color: #28a745; } /* Green for Danielle */
+.location-4 { color: #bf0df0; } /* Cyan for Lori */

@@ -107,20 +107,20 @@
                                             <%# Expand/Collapse Button %>
                                             <% if (product.locations) { %>
                                             <button
-                                                class="btn btn-sm btn-outline-secondary py-0 px-1 toggle-details-btn" <%# Added class %>
+                                                class="btn btn-sm btn-outline-secondary py-0 px-1 toggle-details-btn"
                                                 type="button"
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#<%= detailId %>"
                                                 aria-expanded="false"
                                                 aria-controls="<%= detailId %>"
                                                 title="Show/Hide Location Details">
-                                                <i class="bi bi-plus-lg toggle-icon"></i> <%# Added class %>
+                                                <i class="bi bi-plus-lg toggle-icon"></i>
                                             </button>
                                             <% } %>
                                         </td>
-                                        <%# Product Name Cell - Now also toggles collapse %>
+                                        <%# Product Name Cell - Also toggles collapse %>
                                         <td
-                                            class="clickable-cell" <%# Added class %>
+                                            class="clickable-cell"
                                             <% if (product.locations) { %>
                                                 data-bs-toggle="collapse"
                                                 data-bs-target="#<%= detailId %>"
@@ -132,22 +132,27 @@
                                         <td class="text-end fw-bold"><%= product.totalQuantity %></td>
                                     </tr>
                                     <%# Collapsible Row for Location Details %>
-                                     <% if (product.locations) { %>
-                                        <tr class="collapse location-details-row" id="<%= detailId %>"> <%# Added class %>
+                                     <% if (product.locations && typeof allLocations !== 'undefined' && allLocations.length > 0) { %> <%# Check if allLocations exists %>
+                                        <tr class="collapse location-details-row" id="<%= detailId %>">
                                             <td colspan="3" class="p-2 bg-light"> <%# Span across all columns %>
-                                                <div class="d-flex justify-content-start align-items-center ps-3">
+                                                <div class="d-flex justify-content-start align-items-center ps-3 flex-wrap"> <%# Added flex-wrap %>
                                                      <strong class="me-3">Location Breakdown:</strong>
-                                                    <% const locationOrder = [1, 2, 3]; %>
-                                                    <% locationOrder.forEach(locId => { %>
-                                                        <% const locData = product.locations[locId]; %>
+                                                    <%# Loop through allLocations from middleware %>
+                                                    <% allLocations.forEach(location => { %>
+                                                        <% const locData = product.locations[location.id]; %>
                                                         <% if (locData) { %>
-                                                            <span class="badge rounded-pill me-2
-                                                                <% if(locId === 1) { %> bg-primary
-                                                                <% } else if (locId === 2) { %> bg-warning text-dark
-                                                                <% } else if (locId === 3) { %> bg-success
-                                                                <% } else { %> bg-secondary <% } %>"
-                                                                title="<%= locData.locationName %>">
-                                                                <%= locData.locationName %>: <%= locData.quantity %>
+                                                            <%# REVISED: Consolidated badge logic %>
+                                                            <%
+                                                              let badgeClass = 'bg-secondary'; // Default
+                                                              if(location.id === 1) { badgeClass = 'bg-primary'; }
+                                                              else if (location.id === 2) { badgeClass = 'bg-warning text-dark'; }
+                                                              else if (location.id === 3) { badgeClass = 'bg-success'; }
+                                                              else if (location.id === 4) { badgeClass = 'bg-info text-dark'; }
+                                                              // Add more 'else if' here for future locations
+                                                            %>
+                                                            <span class="badge rounded-pill me-2 mb-1 <%= badgeClass %>" <%# Added mb-1 for wrapping %>
+                                                                  title="<%= locData.locationName %>">
+                                                                  <%= locData.locationName %>: <%= locData.quantity %>
                                                             </span>
                                                         <% } %>
                                                     <% }); %>
